@@ -1,6 +1,8 @@
 # Buscador de Salones · Sportium
 
-Herramienta interna para buscar información de red, televisión y contenido de los salones de Sportium. Incluye integración con PiSignage para monitorizar pantallas.
+Herramienta interna que centraliza la información de red y servicios de cada salón de Sportium: IPs (SSBT, POS, Albos/Multi, PiSignage), routers, configuración de TV, SIS, ARC y más. Todo en un solo lugar para poder dar un servicio rápido y eficaz sin tener que consultar múltiples fuentes.
+
+La integración con PiSignage permite asociar las pantallas (players) de cada sala y consultar sus IPs, playlists y estado de conexión directamente desde el buscador.
 
 ## Requisitos
 

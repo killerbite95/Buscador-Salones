@@ -2,17 +2,92 @@
 
 ## Arquitectura
 
-Aplicación PHP monolítica con SQLite. Sin frameworks, sin dependencias externas (solo Bootstrap 5 por CDN). Diseñada para funcionar con `php -S` en entorno local o detrás de Apache/Nginx.
+### Visión general
+
+Aplicación PHP monolítica sin frameworks ni dependencias backend. Usa SQLite como base de datos embebida y Bootstrap 5.3.3 (CDN) para la interfaz. Diseñada para funcionar tanto con el servidor de desarrollo de PHP (`php -S`) como detrás de Apache o Nginx en producción.
+
+### Stack tecnológico
+
+| Capa | Tecnología | Notas |
+|---|---|---|
+| Backend | PHP 8.0+ | Sin frameworks — vanilla PHP |
+| Base de datos | SQLite 3 + WAL | Fichero local, sin servidor de BD |
+| Frontend | Bootstrap 5.3.3 (dark) | CDN, sin build step |
+| JavaScript | Vanilla ES6+ | Sin frameworks — DOM API nativa |
+| Servidor | `php -S` / Apache / Nginx | Cualquiera compatible con PHP |
+
+### Diagrama de componentes
 
 ```
-Browser ──→ PHP Built-in Server / Apache
-               │
-               ├── index.php      (UI buscador)
-               ├── api.php        (JSON endpoints)
-               ├── admin.php      (panel admin)
-               ├── login.php      (autenticación)
-               │
-               └── data/salones.db (SQLite)
+┌─────────────────────────────────────────────────────────────┐
+│                        NAVEGADOR                            │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────────┐ │
+│  │ index.php│  │ admin.php│  │login.php │  │admin_history│ │
+│  │ Buscador │  │  Panel   │  │  Login   │  │  Auditoría  │ │
+│  └────┬─────┘  └────┬─────┘  └──────────┘  └─────────────┘ │
+│       │ AJAX         │ POST                                 │
+└───────┼──────────────┼──────────────────────────────────────┘
+        │              │
+┌───────▼──────────────▼──────────────────────────────────────┐
+│                    SERVIDOR PHP                             │
+│                                                             │
+│  ┌─────────── Capa de Seguridad ──────────────────────┐     │
+│  │  security.php  →  CSRF · Rate Limit · Headers · CSP│     │
+│  │  auth.php      →  Sesiones · Permisos · Login      │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─────────── Capa de Presentación ───────────────────┐     │
+│  │  header.php / footer.php / styles.css (compartidos)│     │
+│  │  index.php · admin.php · login.php · admin_history │     │
+│  │  change_password.php                               │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─────────── Capa de Lógica ─────────────────────────┐     │
+│  │  api.php            →  JSON: búsqueda + sugerencias│     │
+│  │  import.php         →  Importar CSV salones        │     │
+│  │  import_players.php →  Importar CSV PiSignage      │     │
+│  │  user_save.php      →  CRUD de usuarios            │     │
+│  │  helpers.php        →  CSV parsing · auditLog()    │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+│  ┌─────────── Capa de Datos ──────────────────────────┐     │
+│  │  config.php  →  Constantes (DB path, admin hash)   │     │
+│  │  db.php      →  PDO SQLite + schema auto-migración │     │
+│  └──────────────────────┬─────────────────────────────┘     │
+│                         │                                   │
+└─────────────────────────┼───────────────────────────────────┘
+                          │
+                  ┌───────▼───────┐
+                  │ data/         │
+                  │  salones.db   │
+                  │  .htaccess    │
+                  └───────────────┘
+```
+
+### Flujo de una petición
+
+1. El navegador hace una petición (HTML o AJAX)
+2. **Seguridad:** `security.php` inyecta cabeceras HTTP (CSP, X-Frame-Options…) y prepara CSRF
+3. **Autenticación:** `auth.php` verifica la sesión; si no hay sesión válida → redirige a `login.php`
+4. **Lógica:** el controlador correspondiente procesa la petición (búsqueda, importación, CRUD…)
+5. **Datos:** `db.php` proporciona la conexión PDO a SQLite con WAL y crea el schema si es la primera vez
+6. **Respuesta:** HTML renderizado con `header.php` + `footer.php` + `styles.css`, o JSON desde `api.php`
+
+### Flujo de búsqueda (AJAX)
+
+```
+Usuario escribe → debounce 200ms → GET api.php?suggest=1&q=... → JSON sugerencias
+Usuario busca   → GET api.php?q=... → JSON {salon, pisignage} → render DOM
+```
+
+### Flujo de importación
+
+```
+Admin sube CSV → confirm() con conteo → POST import.php
+  → csrfVerify() → validar tamaño/extensión
+  → ensureUtf8() → parseCSV() → detectColumns()
+  → BEGIN → DELETE → INSERT N filas → COMMIT
+  → redirect admin.php?msg=✓
 ```
 
 ---
