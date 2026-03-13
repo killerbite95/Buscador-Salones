@@ -5,6 +5,10 @@ require_once 'db.php';
 
 setSecurityHeaders();
 requireLogin();
+if (!canAccessAdmin()) {
+    header('Location: index.php');
+    exit;
+}
 
 $pdo = getDB();
 $totalSalones = (int) $pdo->query("SELECT COUNT(*) FROM salones")->fetchColumn();
@@ -16,7 +20,7 @@ $dbUsers      = isAdmin() ? $pdo->query("SELECT * FROM users ORDER BY id")->fetc
 $msg   = htmlspecialchars($_GET['msg']   ?? '');
 $error = htmlspecialchars($_GET['error'] ?? '');
 
-$permLabels = ['salones' => 'Solo Salones', 'pisignage' => 'Solo PiSignage', 'both' => 'Ambos'];
+$permLabels = ['viewer' => 'Solo Lectura', 'salones' => 'Solo Salones', 'pisignage' => 'Solo PiSignage', 'both' => 'Ambos'];
 ?><!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
 <head>

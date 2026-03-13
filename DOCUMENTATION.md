@@ -64,7 +64,7 @@ SQLite con WAL journal mode. El esquema se crea automáticamente en `db.php` al 
 | `id` | INTEGER PK | Auto-incremental |
 | `username` | TEXT UNIQUE | Nombre de usuario (case-insensitive) |
 | `password` | TEXT | Hash bcrypt (`password_hash`) |
-| `perms` | TEXT | `'salones'`, `'pisignage'` o `'both'` |
+| `perms` | TEXT | `'viewer'`, `'salones'`, `'pisignage'` o `'both'` |
 | `active` | INTEGER | 1 = activo, 0 = deshabilitado |
 | `created_at` | DATETIME | Fecha de creación |
 
@@ -84,7 +84,7 @@ Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
 
 1. **Admin de config** — Definido en `config.php` (`ADMIN_USER` / `ADMIN_PASS`). Tiene permisos totales (`'all'`). No usa hash porque la contraseña está en texto plano en el servidor.
 
-2. **Usuarios de BD** — Creados desde el panel. Contraseña hasheada con `password_hash()` / `password_verify()`. Permisos: `'salones'`, `'pisignage'` o `'both'`.
+2. **Usuarios de BD** — Creados desde el panel. Contraseña hasheada con `password_hash()` / `password_verify()`. Permisos: `'viewer'` (solo búsqueda), `'salones'`, `'pisignage'` o `'both'`. Los usuarios `viewer` no tienen acceso al panel de administración.
 
 ### Sesión
 

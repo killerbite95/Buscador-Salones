@@ -73,11 +73,30 @@ function getDB(): PDO
             username   TEXT NOT NULL UNIQUE COLLATE NOCASE,
             password   TEXT NOT NULL,
             perms      TEXT NOT NULL DEFAULT 'both'
-                           CHECK(perms IN ('salones','pisignage','both')),
+                           CHECK(perms IN ('viewer','salones','pisignage','both')),
             active     INTEGER NOT NULL DEFAULT 1,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
     ");
+
+    // Migrate: add 'viewer' to CHECK constraint on existing databases
+    $tableInfo = $pdo->query("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'")->fetchColumn();
+    if ($tableInfo && strpos($tableInfo, "'viewer'") === false) {
+        $pdo->exec("ALTER TABLE users RENAME TO users_old");
+        $pdo->exec("
+            CREATE TABLE users (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                username   TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                password   TEXT NOT NULL,
+                perms      TEXT NOT NULL DEFAULT 'both'
+                               CHECK(perms IN ('viewer','salones','pisignage','both')),
+                active     INTEGER NOT NULL DEFAULT 1,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+        $pdo->exec("INSERT INTO users SELECT * FROM users_old");
+        $pdo->exec("DROP TABLE users_old");
+    }
 
     return $pdo;
 }

@@ -48,13 +48,14 @@ Abre http://localhost:8080 y accede con tus credenciales.
 
 ### Usuarios
 
-El admin puede crear usuarios desde el panel con 3 niveles de permisos:
+El admin puede crear usuarios desde el panel con 4 niveles de permisos:
 
-| Permiso | Puede importar |
+| Permiso | Acceso |
 |---|---|
-| `salones` | Solo CSV de salones |
-| `pisignage` | Solo CSV de PiSignage |
-| `both` | Ambos |
+| `viewer` | Solo búsqueda (sin acceso al panel admin) |
+| `salones` | Panel admin + importar CSV de salones |
+| `pisignage` | Panel admin + importar CSV de PiSignage |
+| `both` | Panel admin + importar ambos CSV |
 
 ## Estructura
 

@@ -25,6 +25,12 @@ function currentPerms(): string
     return $_SESSION['perms'] ?? 'both';
 }
 
+function canAccessAdmin(): bool
+{
+    if (!isLoggedIn()) return false;
+    return currentPerms() !== 'viewer';
+}
+
 function canImportSalones(): bool
 {
     if (!isLoggedIn()) return false;

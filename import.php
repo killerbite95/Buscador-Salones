@@ -6,8 +6,8 @@ require_once 'helpers.php';
 
 setSecurityHeaders();
 requireLogin();
-if (!canImportSalones()) {
-    header('Location: admin.php?error=' . urlencode('No tienes permiso para importar salones.'));
+if (!canAccessAdmin() || !canImportSalones()) {
+    header('Location: index.php');
     exit;
 }
 

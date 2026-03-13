@@ -19,7 +19,7 @@ $password = trim($_POST['password'] ?? '');
 $perms    = $_POST['perms'] ?? 'both';
 $active   = isset($_POST['active']) ? 1 : 0;
 
-$validPerms = ['salones', 'pisignage', 'both'];
+$validPerms = ['viewer', 'salones', 'pisignage', 'both'];
 if (!in_array($perms, $validPerms, true)) {
     header('Location: admin.php?error=' . urlencode('Permiso no válido.') . '#usuarios');
     exit;

@@ -108,7 +108,7 @@ $csrfToken    = csrfToken(); // para pasar al JS en meta tag
 
     <!-- Controles derecha -->
     <div class="d-flex align-items-center gap-2">
-      <?php if (isAdmin() || canImportSalones() || canImportPisignage()): ?>
+      <?php if (canAccessAdmin()): ?>
         <a href="admin.php"
            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
            style="font-size:.8rem">
@@ -138,7 +138,7 @@ $csrfToken    = csrfToken(); // para pasar al JS en meta tag
             </span>
           </li>
           <li><hr class="dropdown-divider border-secondary"></li>
-          <?php if (isAdmin() || canImportSalones() || canImportPisignage()): ?>
+          <?php if (canAccessAdmin()): ?>
           <li>
             <a class="dropdown-item" href="admin.php" style="font-size:.85rem">
               Panel de administración

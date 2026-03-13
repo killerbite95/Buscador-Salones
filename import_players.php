@@ -6,8 +6,8 @@ require_once 'helpers.php';
 
 setSecurityHeaders();
 requireLogin();
-if (!canImportPisignage()) {
-    header('Location: admin.php?error=' . urlencode('No tienes permiso para importar PiSignage.'));
+if (!canAccessAdmin() || !canImportPisignage()) {
+    header('Location: index.php');
     exit;
 }
 
