@@ -111,6 +111,10 @@ El admin puede crear usuarios desde el panel con 4 niveles de permisos:
 - `aria-hidden="true"` en SVGs decorativos
 - Contraste WCAG AA en texto secundario (ratio ≥ 4.5:1)
 
+## Documentación
+
+Para detalles técnicos sobre la arquitectura, base de datos, API, seguridad y frontend, consulta [DOCUMENTATION.md](DOCUMENTATION.md).
+
 ## Licencia
 
 Uso interno — Sportium.
