@@ -79,7 +79,7 @@ function getDB(): PDO
         )
     ");
 
-    // Migrate: add 'viewer' to CHECK constraint on existing databases
+    
     $tableInfo = $pdo->query("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'")->fetchColumn();
     if ($tableInfo && strpos($tableInfo, "'viewer'") === false) {
         $pdo->exec("ALTER TABLE users RENAME TO users_old");
@@ -97,6 +97,17 @@ function getDB(): PDO
         $pdo->exec("INSERT INTO users SELECT * FROM users_old");
         $pdo->exec("DROP TABLE users_old");
     }
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            action      TEXT NOT NULL,
+            target_user TEXT NOT NULL,
+            details     TEXT NOT NULL DEFAULT '',
+            performed_by TEXT NOT NULL,
+            created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
 
     return $pdo;
 }

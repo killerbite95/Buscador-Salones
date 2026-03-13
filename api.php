@@ -61,30 +61,55 @@ if ($suggest) {
 }
 
 // Búsqueda completa
-if ($digits === '') {
-    echo json_encode(['error' => 'El código debe contener dígitos.']);
-    exit;
+$stmt = null;
+$salon = null;
+
+// Try exact code match first (digits only)
+if ($digits !== '') {
+    $stmt = $pdo->prepare("SELECT * FROM salones WHERE codigo = ? LIMIT 1");
+    $stmt->execute([$digits]);
+    $salon = $stmt->fetch();
+
+    if (!$salon) {
+        $stmt = $pdo->prepare("SELECT * FROM salones WHERE codigo LIKE ? ORDER BY LENGTH(codigo) LIMIT 1");
+        $stmt->execute([$digits . '%']);
+        $salon = $stmt->fetch();
+    }
 }
 
-$stmt = $pdo->prepare("SELECT * FROM salones WHERE codigo = ? LIMIT 1");
-$stmt->execute([$digits]);
-$salon = $stmt->fetch();
-
-if (!$salon) {
-    $stmt = $pdo->prepare("SELECT * FROM salones WHERE codigo LIKE ? ORDER BY LENGTH(codigo) LIMIT 1");
-    $stmt->execute([$digits . '%']);
+// If no match by code, try name search
+if (!$salon && mb_strlen($q) >= 2) {
+    $stmt = $pdo->prepare("SELECT * FROM salones WHERE LOWER(nombre) LIKE ? LIMIT 1");
+    $stmt->execute(['%' . mb_strtolower($q, 'UTF-8') . '%']);
     $salon = $stmt->fetch();
 }
 
 if (!$salon) {
-    $stmt = $pdo->prepare("
-        SELECT codigo, nombre FROM salones
-        WHERE codigo LIKE :a OR codigo LIKE :b
-        ORDER BY LENGTH(codigo)
-        LIMIT 8
-    ");
-    $stmt->execute([':a' => $digits . '%', ':b' => '%' . $digits]);
-    echo json_encode(['not_found' => true, 'q' => $digits, 'suggestions' => $stmt->fetchAll()]);
+    $suggestions = [];
+    if ($digits !== '') {
+        $stmt = $pdo->prepare("
+            SELECT codigo, nombre FROM salones
+            WHERE codigo LIKE :a OR codigo LIKE :b
+            ORDER BY LENGTH(codigo)
+            LIMIT 8
+        ");
+        $stmt->execute([':a' => $digits . '%', ':b' => '%' . $digits]);
+        $suggestions = $stmt->fetchAll();
+    }
+    if (count($suggestions) < 8 && mb_strlen($q) >= 2) {
+        $limit = 8 - count($suggestions);
+        $stmt  = $pdo->prepare("SELECT codigo, nombre FROM salones WHERE LOWER(nombre) LIKE ? LIMIT ?");
+        $stmt->bindValue(1, '%' . mb_strtolower($q, 'UTF-8') . '%');
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $existing = array_column($suggestions, 'codigo');
+        foreach ($stmt->fetchAll() as $r) {
+            if (!in_array($r['codigo'], $existing, true)) {
+                $suggestions[] = $r;
+            }
+        }
+    }
+    echo json_encode(['not_found' => true, 'q' => $q, 'suggestions' => $suggestions]);
     exit;
 }
 

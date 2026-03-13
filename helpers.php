@@ -134,3 +134,12 @@ function parseCSV(string $text): array
 
     return [$headers ?? [], $rows];
 }
+
+/**
+ * Write an entry to the audit log.
+ */
+function auditLog(PDO $pdo, string $action, string $target, string $details): void
+{
+    $pdo->prepare("INSERT INTO audit_log (action, target_user, details, performed_by) VALUES (?, ?, ?, ?)")
+        ->execute([$action, $target, $details, currentUsername()]);
+}

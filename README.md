@@ -19,8 +19,13 @@ Edita `config.php` con tus credenciales:
 
 ```php
 define('ADMIN_USER', 'tu_usuario');
-define('ADMIN_PASS', 'tu_contraseña');
+define('ADMIN_PASS', password_hash('tu_contraseña', PASSWORD_DEFAULT));
 ```
+
+> **Nota:** `ADMIN_PASS` debe ser un hash bcrypt generado con `password_hash()`. Puedes generarlo con:
+> ```bash
+> php -r "echo password_hash('mi_password', PASSWORD_DEFAULT);"
+> ```
 
 Arranca el servidor:
 
@@ -42,7 +47,7 @@ Abre http://localhost:8080 y accede con tus credenciales.
 ### Búsqueda
 
 - Escribe un código de sala o parte del nombre
-- Autocomplete sugiere resultados mientras escribes
+- Autocomplete sugiere resultados mientras escribes (navega con ↑/↓, selecciona con Enter)
 - Los resultados muestran: red, televisión, contenido y pantallas PiSignage
 - Las IPs tienen botón de copiar al portapapeles
 
@@ -65,15 +70,21 @@ El admin puede crear usuarios desde el panel con 4 niveles de permisos:
 ├── db.php              # Conexión SQLite y esquema
 ├── auth.php            # Sesiones y permisos
 ├── security.php        # CSRF, rate limiting, headers
-├── helpers.php         # Parseo CSV y detección de columnas
+├── helpers.php         # Parseo CSV, detección de columnas, audit log
+├── styles.css          # Estilos CSS compartidos
+├── header.php          # Navbar compartida (partial)
+├── footer.php          # Footer compartido (partial)
 ├── index.php           # Buscador principal
 ├── admin.php           # Panel de administración
+├── admin_history.php   # Historial de auditoría (paginado)
 ├── api.php             # API JSON (búsqueda + sugerencias)
 ├── login.php           # Login
 ├── logout.php          # Logout
+├── change_password.php # Cambio de contraseña (usuarios BD)
 ├── import.php          # Importación CSV salones
 ├── import_players.php  # Importación CSV PiSignage
 ├── user_save.php       # CRUD de usuarios
+├── mejoras.md          # Roadmap de mejoras pendientes
 ├── data/
 │   ├── .htaccess       # Bloquea acceso directo a la BD
 │   └── salones.db      # Base de datos SQLite (auto-generada)
@@ -83,11 +94,22 @@ El admin puede crear usuarios desde el panel con 4 niveles de permisos:
 
 ## Seguridad
 
-- Tokens CSRF en todos los formularios
+- Contraseña admin almacenada como hash bcrypt (nunca en texto plano)
+- Tokens CSRF en todos los formularios (rotación tras cada uso)
 - Rate limiting en login (10 intentos / 15 min por IP)
 - Sesiones seguras (HttpOnly, SameSite=Strict, regeneración cada 20 min)
 - Cabeceras HTTP de seguridad (CSP, X-Frame-Options, etc.)
+- Límite de 256 MB en uploads
+- Protección XSS: DOM construction en vez de innerHTML
 - Todas las páginas requieren autenticación
+- Historial de auditoría para todas las acciones sobre usuarios
+
+## Accesibilidad
+
+- Autocomplete ARIA-compliant (`role="listbox"`, `aria-expanded`, `aria-activedescendant`)
+- `aria-label` en botones con solo icono
+- `aria-hidden="true"` en SVGs decorativos
+- Contraste WCAG AA en texto secundario (ratio ≥ 4.5:1)
 
 ## Licencia
 

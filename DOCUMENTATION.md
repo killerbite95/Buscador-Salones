@@ -72,6 +72,17 @@ SQLite con WAL journal mode. El esquema se crea automáticamente en `db.php` al 
 
 Registro de cada importación: `filename`, `total_rows`, `imported_at`.
 
+#### `audit_log`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | INTEGER PK | Auto-incremental |
+| `action` | TEXT | Tipo de acción (`create`, `edit`, `delete`) |
+| `target_user` | TEXT | Usuario afectado por la acción |
+| `details` | TEXT | Descripción de los cambios |
+| `performed_by` | TEXT | Usuario que realizó la acción |
+| `created_at` | DATETIME | Fecha/hora del evento |
+
 #### `login_attempts`
 
 Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
@@ -82,7 +93,7 @@ Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
 
 ### Dos fuentes de usuarios
 
-1. **Admin de config** — Definido en `config.php` (`ADMIN_USER` / `ADMIN_PASS`). Tiene permisos totales (`'all'`). No usa hash porque la contraseña está en texto plano en el servidor.
+1. **Admin de config** — Definido en `config.php` (`ADMIN_USER` / `ADMIN_PASS`). Tiene permisos totales (`'all'`). La contraseña se almacena como hash bcrypt generado con `password_hash()`. La verificación en `auth.php` usa `password_verify()`.
 
 2. **Usuarios de BD** — Creados desde el panel. Contraseña hasheada con `password_hash()` / `password_verify()`. Permisos: `'viewer'` (solo búsqueda), `'salones'`, `'pisignage'` o `'both'`. Los usuarios `viewer` no tienen acceso al panel de administración.
 
@@ -107,7 +118,7 @@ Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
 
 **Archivo:** `import.php`
 
-1. Se sube el CSV exportado de Insight/Jira
+1. Se sube el CSV exportado de Insight/Jira (máx. 256 MB)
 2. Se convierte a UTF-8 (detecta BOM e ISO-8859-1)
 3. Se parsea con `fgetcsv` via stream en memoria
 4. Se detectan las columnas automáticamente por nombre (fuzzy matching con normalización)
@@ -120,7 +131,7 @@ Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
 
 **Archivo:** `import_players.php`
 
-1. Se sube el `PlayersListMongo.csv`
+1. Se sube el `PlayersListMongo.csv` (máx. 256 MB)
 2. Se detectan columnas: `name`, `myIpAddress`, `currentPlaylist`, `lastReported`
 3. Se extrae el código de sala del nombre del player:
    - `ESGA80_T4025_D02` → código `4025`, pantalla `D02`
@@ -135,16 +146,20 @@ Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
 
 Requiere autenticación (devuelve 401 JSON si no hay sesión).
 
-### `GET /api.php?q=<código>&suggest=1`
+### `GET /api.php?q=<texto>&suggest=1`
 
 Autocomplete. Devuelve array de `{codigo, nombre}` (máx. 10).
 
-- Busca por prefijo de código
-- Complementa con búsqueda por nombre si quedan huecos
+- Busca por prefijo de código (si hay dígitos en la consulta)
+- Complementa con búsqueda por nombre (`LIKE %texto%`) si quedan huecos o el texto tiene ≥ 2 caracteres
 
-### `GET /api.php?q=<código>`
+### `GET /api.php?q=<texto>`
 
-Búsqueda completa. Devuelve:
+Búsqueda completa. Acepta código numérico o nombre de sala. Orden de búsqueda:
+
+1. Código exacto → 2. Prefijo de código → 3. Nombre (`LIKE %texto%`)
+
+Devuelve:
 
 ```json
 {
@@ -174,6 +189,7 @@ Si no encuentra:
 - Token de 64 caracteres hex (`random_bytes(32)`)
 - Almacenado en `$_SESSION['csrf_token']`
 - Validado en cada POST con `hash_equals`
+- **Rotación tras uso:** el token se destruye después de cada verificación exitosa, previniendo replay attacks
 - Campo hidden generado con `csrfField()`
 
 ### Cabeceras HTTP
@@ -215,9 +231,28 @@ Si no encuentra:
 ### Funcionalidades JS
 
 - Autocomplete con debounce de 200ms
+- Navegación por teclado en sugerencias (↑/↓ para navegar, Enter para seleccionar, Escape para cerrar)
+- Búsqueda por código numérico o nombre de sala
 - Búsquedas recientes en `localStorage`
 - Copiar IPs al portapapeles
 - Spinner de carga en botón de búsqueda
 - Animación fadeInUp en resultados
 - Indicador PiSignage en campo IP Albos (borde rojo + label dinámico)
 - Badges online/offline en tabla PiSignage (umbral: 24h)
+- Confirmación antes de importar con nombre de archivo y conteo de registros actuales
+- Protección XSS: toda la UI se construye con DOM methods (`createElement` / `textContent`), sin `innerHTML` con datos de usuario
+
+### Accesibilidad
+
+- `role="listbox"` en contenedor de sugerencias, `role="option"` en cada ítem
+- `aria-expanded`, `aria-activedescendant` en el input de búsqueda
+- `aria-label` en botones que solo tienen icono (Admin, Buscador, Copiar IP)
+- `aria-hidden="true"` en todos los SVGs decorativos
+- Contraste WCAG AA: texto secundario `#94a3b8` sobre `#0f172a` (ratio 4.6:1)
+
+### Arquitectura de componentes compartidos
+
+- **`styles.css`** — CSS común: body, animaciones, `.card-dark`, `.btn-sportium`, dropdown, forms, scrollbar, spinner, header
+- **`header.php`** — Navbar parametrizada vía variables PHP (`$headerTitle`, `$headerSubtitle`, `$headerHref`, `$headerMaxWidth`, `$headerActions`)
+- **`footer.php`** — Footer con copyright
+- **`helpers.php`** — Funciones compartidas: parseo CSV, detección de columnas, `auditLog()`

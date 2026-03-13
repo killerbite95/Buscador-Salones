@@ -1,0 +1,116 @@
+/* ============================================================
+   Sportium · Buscador de Salones — Shared styles
+   ============================================================ */
+
+/* Base */
+body {
+    background: #0f172a;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-in {
+    animation: fadeInUp .3s ease-out both;
+}
+
+/* Cards */
+.card-dark {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 1rem;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+/* Buttons */
+.btn-sportium {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+    transition: all .2s;
+}
+
+.btn-sportium:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, .3);
+}
+
+.btn-sportium:active {
+    transform: scale(.97);
+    box-shadow: none;
+}
+
+/* Dropdown */
+.dropdown-item {
+    color: #cbd5e1;
+    transition: background .15s, color .15s;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+.dropdown-item.text-danger:hover {
+    background: #450a0a44;
+}
+
+.dropdown-toggle::after {
+    vertical-align: middle;
+}
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .15);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+/* Spinner */
+.spinner-sm {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2.5px solid rgba(255, 255, 255, .25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .5s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Shared header */
+.app-header {
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+}

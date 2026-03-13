@@ -49,6 +49,8 @@ function csrfVerify(): void
         header('Location: ' . $back . '?error=' . urlencode('Solicitud no válida (CSRF). Inténtalo de nuevo.'));
         exit;
     }
+    // Rotate token after successful verification to prevent replay
+    unset($_SESSION['csrf_token']);
 }
 
 function loginCheckRateLimit(string $ip): bool

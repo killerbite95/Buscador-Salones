@@ -20,16 +20,9 @@ $csrfToken    = csrfToken(); // para pasar al JS en meta tag
   <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken) ?>">
   <link rel="icon" type="image/png" href="images/logo-sp.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { background: #0f172a; }
-
-    /* Animations */
-    @keyframes fadeInUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .animate-in { animation: fadeInUp .3s ease-out both; }
-
-    /* Cards */
-    .card-dark { background: #1e293b; border: 1px solid #334155; border-radius: 1rem; transition: border-color .2s, box-shadow .2s; }
+    /* Page-specific: search & results */
     .field-card {
       background: #0f172a; border: 1px solid #334155; border-radius: .75rem;
       padding: .875rem 1rem; transition: border-color .2s, box-shadow .2s, transform .2s;
@@ -37,132 +30,56 @@ $csrfToken    = csrfToken(); // para pasar al JS en meta tag
     .field-card:hover { border-color: #475569; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
     .field-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; margin-bottom: .3rem; }
     .field-value { font-size: .875rem; font-weight: 600; word-break: break-all; }
-
-    /* Field group headers */
     .field-group-title {
       font-size: .65rem; text-transform: uppercase; letter-spacing: .08em;
-      color: #64748b; margin-top: .75rem; margin-bottom: .25rem; padding-left: .125rem;
+      color: #94a3b8; margin-top: .75rem; margin-bottom: .25rem; padding-left: .125rem;
     }
-
-    /* Buttons */
-    .btn-sportium { background: #dc2626; border-color: #dc2626; color: #fff; transition: all .2s; }
-    .btn-sportium:hover { background: #b91c1c; border-color: #b91c1c; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,.3); }
-    .btn-sportium:active { transform: scale(.97); box-shadow: none; }
-
-    /* Search input focus glow */
     #codigoInput { transition: border-color .2s, box-shadow .2s; }
     #codigoInput:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
-
-    /* Suggestions dropdown */
     #suggestionsBox {
       position: absolute; z-index: 30; left: 0; right: 0; top: 100%; margin-top: .4rem;
       background: #0f172a; border: 1px solid #475569; border-radius: .75rem;
       max-height: 16rem; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.3);
     }
     .sugg-item { padding: .5rem .875rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background .15s; }
-    .sugg-item:hover { background: #1e293b; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar       { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-
-    /* Dropdown menu */
-    .dropdown-item { color: #cbd5e1; transition: background .15s, color .15s; }
-    .dropdown-item:hover, .dropdown-item:focus { background: #0f172a; color: #f1f5f9; }
-    .dropdown-item.text-danger:hover { background: #450a0a44; }
-    .dropdown-toggle::after { vertical-align: middle; }
-
-    /* Loading spinner */
-    .spinner-sm {
-      width: 1.1rem; height: 1.1rem;
-      border: 2.5px solid rgba(255,255,255,.25); border-top-color: #fff;
-      border-radius: 50%; animation: spin .5s linear infinite;
-      display: inline-block; vertical-align: middle;
-    }
-
-    /* Recent search pills */
+    .sugg-item:hover, .sugg-item.active { background: #1e293b; }
     .btn-outline-secondary { transition: all .2s; }
     .btn-outline-secondary:hover { transform: translateY(-1px); }
-
-    /* PiSignage */
     .table-dark { --bs-table-bg: transparent; }
     .badge { transition: all .2s; }
   </style>
 </head>
 <body>
 
-<header style="background:#1e293b;border-bottom:1px solid #334155">
-  <div class="container d-flex align-items-center justify-content-between py-3" style="max-width:1040px">
+<?php
+$headerTitle    = 'Buscador de Salones';
+$headerSubtitle = '<span style="line-height:1.4">Salones: ' . ($lastImport ? substr($lastImport['imported_at'], 0, 10) : '<span class="fst-italic">sin datos</span>') .
+                  '<br>PiSignage: ' . ($lastPiImport ? substr($lastPiImport['imported_at'], 0, 10) : '<span class="fst-italic">sin datos</span>') . '</span>';
+$headerHref     = 'index.php';
+$headerMaxWidth = '1040px';
 
-    <!-- Logo + título -->
-    <a href="index.php" class="d-flex align-items-center gap-3 text-decoration-none">
-      <img src="images/logo-sp.png" alt="Sportium" height="36">
-      <div class="d-none d-sm-block lh-sm">
-        <div class="fw-semibold text-white" style="font-size:.95rem">Buscador de Salones</div>
-        <div class="text-secondary" style="font-size:.72rem;line-height:1.4">
-          Salones: <?= $lastImport ? substr($lastImport['imported_at'], 0, 10) : '<span class="fst-italic">sin datos</span>' ?><br>
-          PiSignage: <?= $lastPiImport ? substr($lastPiImport['imported_at'], 0, 10) : '<span class="fst-italic">sin datos</span>' ?>
-        </div>
-      </div>
-    </a>
-
-    <!-- Controles derecha -->
-    <div class="d-flex align-items-center gap-2">
-      <?php if (canAccessAdmin()): ?>
-        <a href="admin.php"
-           class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-           style="font-size:.8rem">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-          </svg>
-          <span class="d-none d-md-inline">Admin</span>
-        </a>
-      <?php endif; ?>
-
-      <!-- Avatar / usuario -->
-      <div class="dropdown">
-        <button class="btn btn-sm d-flex align-items-center gap-2 dropdown-toggle"
-                style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;font-size:.8rem"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <span class="d-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
-                style="width:24px;height:24px;background:#dc2626;font-size:.65rem;flex-shrink:0">
-            <?= strtoupper(substr(currentUsername(), 0, 1)) ?>
-          </span>
-          <span class="d-none d-sm-inline"><?= htmlspecialchars(currentUsername()) ?></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" style="background:#1e293b;border:1px solid #334155;min-width:160px">
-          <li>
-            <span class="dropdown-item-text text-secondary" style="font-size:.75rem">
-              Conectado como<br>
-              <strong class="text-white"><?= htmlspecialchars(currentUsername()) ?></strong>
-            </span>
-          </li>
-          <li><hr class="dropdown-divider border-secondary"></li>
-          <?php if (canAccessAdmin()): ?>
-          <li>
-            <a class="dropdown-item" href="admin.php" style="font-size:.85rem">
-              Panel de administración
-            </a>
-          </li>
-          <li><hr class="dropdown-divider border-secondary"></li>
-          <?php endif; ?>
-          <li>
-            <a class="dropdown-item text-danger" href="logout.php" style="font-size:.85rem">
-              Cerrar sesión
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-  </div>
-</header>
+ob_start();
+if (canAccessAdmin()):
+?>
+  <a href="admin.php"
+     class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+     style="font-size:.8rem"
+     aria-label="Panel de administración">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+    </svg>
+    <span class="d-none d-md-inline">Admin</span>
+  </a>
+<?php endif;
+$headerActions = ob_get_clean();
+include __DIR__ . '/header.php';
+?>
 
 <main class="container py-4" style="max-width:880px">
 
   <?php if ($totalSalones === 0): ?>
   <div class="alert rounded-4 d-flex align-items-start gap-2" style="background:#78350f22;border:1px solid #92400e;color:#fcd34d">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="flex-shrink-0 mt-1">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="flex-shrink-0 mt-1" aria-hidden="true">
       <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
       <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
     </svg>
@@ -178,12 +95,14 @@ $csrfToken    = csrfToken(); // para pasar al JS en meta tag
     <div class="row g-2 align-items-start">
       <div class="col position-relative">
         <input id="codigoInput" type="search"
-               placeholder="Introduce el código de sala…"
+               placeholder="Código o nombre de sala…"
                autocomplete="off" autocorrect="off" autocapitalize="off"
-               spellcheck="false" inputmode="numeric"
+               spellcheck="false"
+               aria-label="Buscar sala por código o nombre"
+               aria-autocomplete="list" aria-controls="suggestionsBox" aria-expanded="false"
                class="form-control form-control-lg bg-dark border-secondary text-white"
                style="border-radius:.75rem">
-        <div id="suggestionsBox" class="d-none"></div>
+        <div id="suggestionsBox" class="d-none" role="listbox" aria-label="Sugerencias de salas"></div>
       </div>
       <div class="col-auto">
         <button id="searchBtn" class="btn btn-sportium btn-lg px-4 fw-semibold" style="border-radius:.75rem">
@@ -229,12 +148,7 @@ $csrfToken    = csrfToken(); // para pasar al JS en meta tag
 
 </main>
 
-<footer class="container py-4 text-center" style="max-width:880px">
-  <p class="text-secondary small mb-0">
-    © <?= date('Y') ?> Sportium — Uso interno
-
-  </p>
-</footer>
+<?php include __DIR__ . '/footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -284,6 +198,7 @@ function renderRecents() {
 
 // Autocomplete
 let suggestTimer = null;
+let suggActiveIdx = -1;
 const input    = document.getElementById('codigoInput');
 const suggBox  = document.getElementById('suggestionsBox');
 
@@ -294,29 +209,82 @@ input.addEventListener('input', () => {
   suggestTimer = setTimeout(() => fetchSugg(q), 200);
 });
 
+function escHTML(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 async function fetchSugg(q) {
   try {
     const res  = await fetch('api.php?suggest=1&q=' + encodeURIComponent(q));
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) { hideSugg(); return; }
     suggBox.innerHTML = '';
-    for (const r of data) {
+    suggActiveIdx = -1;
+    data.forEach((r, i) => {
       const div = document.createElement('div');
       div.className = 'sugg-item';
-      div.innerHTML = `
-        <span class="fw-semibold">${r.codigo}</span>
-        <span class="text-secondary small ms-3 text-truncate" style="max-width:68%">${r.nombre}</span>
-      `;
+      div.id = 'sugg-opt-' + i;
+      div.setAttribute('role', 'option');
+      const codeSpan = document.createElement('span');
+      codeSpan.className = 'fw-semibold';
+      codeSpan.textContent = r.codigo;
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'text-secondary small ms-3 text-truncate';
+      nameSpan.style.maxWidth = '68%';
+      nameSpan.textContent = r.nombre;
+      div.appendChild(codeSpan);
+      div.appendChild(nameSpan);
       div.addEventListener('click', () => { setValue(r.codigo); hideSugg(); doSearch(); });
       suggBox.appendChild(div);
-    }
+    });
     suggBox.classList.remove('d-none');
+    input.setAttribute('aria-expanded', 'true');
   } catch {}
 }
 
-function hideSugg() { suggBox.classList.add('d-none'); }
+function hideSugg() {
+  suggBox.classList.add('d-none');
+  suggActiveIdx = -1;
+  input.setAttribute('aria-expanded', 'false');
+  input.removeAttribute('aria-activedescendant');
+}
+
+function updateSuggActive() {
+  const items = suggBox.querySelectorAll('.sugg-item');
+  items.forEach((el, i) => {
+    el.classList.toggle('active', i === suggActiveIdx);
+  });
+  if (suggActiveIdx >= 0 && items[suggActiveIdx]) {
+    input.setAttribute('aria-activedescendant', items[suggActiveIdx].id);
+    items[suggActiveIdx].scrollIntoView({ block: 'nearest' });
+  } else {
+    input.removeAttribute('aria-activedescendant');
+  }
+}
 
 input.addEventListener('keydown', e => {
+  const items = suggBox.querySelectorAll('.sugg-item');
+  if (!suggBox.classList.contains('d-none') && items.length) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      suggActiveIdx = (suggActiveIdx + 1) % items.length;
+      updateSuggActive();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      suggActiveIdx = suggActiveIdx <= 0 ? items.length - 1 : suggActiveIdx - 1;
+      updateSuggActive();
+      return;
+    }
+    if (e.key === 'Enter' && suggActiveIdx >= 0) {
+      e.preventDefault();
+      items[suggActiveIdx].click();
+      return;
+    }
+  }
   if (e.key === 'Enter')  { e.preventDefault(); doSearch(); }
   if (e.key === 'Escape') hideSugg();
 });
@@ -372,7 +340,10 @@ function renderResult(salon, pisignage) {
   for (const group of FIELD_GROUPS) {
     const hdrCol = document.createElement('div');
     hdrCol.className = 'col-12';
-    hdrCol.innerHTML = `<div class="field-group-title">${group.title}</div>`;
+    const hdrDiv = document.createElement('div');
+    hdrDiv.className = 'field-group-title';
+    hdrDiv.textContent = group.title;
+    hdrCol.appendChild(hdrDiv);
     grid.appendChild(hdrCol);
 
     for (const [key, label] of group.fields) {
@@ -406,7 +377,8 @@ function renderResult(salon, pisignage) {
         copyBtn.type      = 'button';
         copyBtn.className = 'btn btn-sm btn-outline-secondary ms-auto d-flex align-items-center gap-1';
         copyBtn.style.fontSize = '.72rem';
-        copyBtn.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        copyBtn.setAttribute('aria-label', 'Copiar ' + val);
+        copyBtn.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
         </svg> Copiar`;
@@ -414,7 +386,7 @@ function renderResult(salon, pisignage) {
           await navigator.clipboard.writeText(val);
           copyBtn.textContent = '✓ Copiado';
           setTimeout(() => {
-            copyBtn.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            copyBtn.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg> Copiar`;
@@ -442,52 +414,89 @@ function renderResult(salon, pisignage) {
   if (pisignage && pisignage.length) {
     const header = document.createElement('div');
     header.className = 'mb-2 mt-1';
-    header.innerHTML = `<span class="text-secondary small text-uppercase fw-semibold" style="letter-spacing:.06em">
-      PiSignage · ${pisignage.length} pantalla${pisignage.length !== 1 ? 's' : ''}
-    </span>`;
+    const headerSpan = document.createElement('span');
+    headerSpan.className = 'text-secondary small text-uppercase fw-semibold';
+    headerSpan.style.letterSpacing = '.06em';
+    headerSpan.textContent = 'PiSignage · ' + pisignage.length + ' pantalla' + (pisignage.length !== 1 ? 's' : '');
+    header.appendChild(headerSpan);
     piWrap.appendChild(header);
 
     const table = document.createElement('table');
     table.className = 'table table-sm table-dark mb-0';
     table.style.fontSize = '.8rem';
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th class="text-secondary fw-normal">Pantalla</th>
-          <th class="text-secondary fw-normal">IP</th>
-          <th class="text-secondary fw-normal">Playlist</th>
-          <th class="text-secondary fw-normal">Último reporte</th>
-        </tr>
-      </thead>
-      <tbody></tbody>`;
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    ['Pantalla','IP','Playlist','Último reporte'].forEach(t => {
+      const th = document.createElement('th');
+      th.className = 'text-secondary fw-normal';
+      th.textContent = t;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
 
     const now = Date.now();
     for (const p of pisignage) {
       const last    = p.last_reported ? new Date(p.last_reported) : null;
       const diffH   = last ? (now - last.getTime()) / 36e5 : null;
       const offline = diffH !== null && diffH > 24;
-      const badge   = offline
-        ? `<span class="badge bg-danger ms-1" style="font-size:.65rem">offline</span>`
-        : (diffH !== null ? `<span class="badge bg-success ms-1" style="font-size:.65rem">online</span>` : '');
 
-      const ipCell  = p.ip_address
-        ? `<span class="font-monospace">${p.ip_address}</span>
-           ${navigator.clipboard
-             ? `<button type="button" class="btn btn-sm btn-outline-secondary ms-1 py-0 px-1 copy-ip" data-ip="${p.ip_address}" style="font-size:.65rem">Copiar</button>`
-             : ''}`
-        : '—';
+      const tr = document.createElement('tr');
 
+      // Screen name
+      const tdScreen = document.createElement('td');
+      tdScreen.className = 'align-middle fw-semibold';
+      tdScreen.textContent = p.screen || p.name;
+      tr.appendChild(tdScreen);
+
+      // IP
+      const tdIp = document.createElement('td');
+      tdIp.className = 'align-middle';
+      if (p.ip_address) {
+        const ipSpan = document.createElement('span');
+        ipSpan.className = 'font-monospace';
+        ipSpan.textContent = p.ip_address;
+        tdIp.appendChild(ipSpan);
+        if (navigator.clipboard) {
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'btn btn-sm btn-outline-secondary ms-1 py-0 px-1 copy-ip';
+          copyBtn.style.fontSize = '.65rem';
+          copyBtn.dataset.ip = p.ip_address;
+          copyBtn.textContent = 'Copiar';
+          copyBtn.setAttribute('aria-label', 'Copiar IP ' + p.ip_address);
+          tdIp.appendChild(copyBtn);
+        }
+      } else {
+        tdIp.textContent = '—';
+      }
+      tr.appendChild(tdIp);
+
+      // Playlist
+      const tdPlaylist = document.createElement('td');
+      tdPlaylist.className = 'align-middle text-secondary';
+      tdPlaylist.textContent = p.playlist || '—';
+      tr.appendChild(tdPlaylist);
+
+      // Last reported + badge
+      const tdLast = document.createElement('td');
+      tdLast.className = 'align-middle';
       const lastStr = last
         ? last.toLocaleString('es-ES', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
         : '—';
+      tdLast.textContent = lastStr;
+      if (diffH !== null) {
+        const badge = document.createElement('span');
+        badge.className = offline ? 'badge bg-danger ms-1' : 'badge bg-success ms-1';
+        badge.style.fontSize = '.65rem';
+        badge.textContent = offline ? 'offline' : 'online';
+        tdLast.appendChild(badge);
+      }
+      tr.appendChild(tdLast);
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="align-middle fw-semibold">${p.screen || p.name}</td>
-        <td class="align-middle">${ipCell}</td>
-        <td class="align-middle text-secondary">${p.playlist || '—'}</td>
-        <td class="align-middle">${lastStr}${badge}</td>`;
-      table.querySelector('tbody').appendChild(tr);
+      tbody.appendChild(tr);
     }
 
     table.addEventListener('click', async e => {
@@ -512,20 +521,30 @@ function renderResult(salon, pisignage) {
 function showNotFound(q, suggestions) {
   document.getElementById('resultSection').classList.add('d-none');
   const box = document.getElementById('notFoundBox');
-  let html = `<strong>No se encontró el código "${q}".</strong>`;
+  box.innerHTML = '';
+  const strong = document.createElement('strong');
+  strong.textContent = 'No se encontró "' + q + '".';
+  box.appendChild(strong);
   if (suggestions.length) {
-    html += `<div class="mt-2 mb-1">¿Quizá buscabas?</div><ul class="mb-0">` +
-      suggestions.map(s =>
-        `<li>
-          <button type="button" class="btn btn-link p-0 text-decoration-none"
-                  style="color:#fca5a5"
-                  onclick="setValue('${s.codigo}');doSearch()">
-            ${s.codigo} · ${s.nombre}
-          </button>
-        </li>`
-      ).join('') + '</ul>';
+    const hint = document.createElement('div');
+    hint.className = 'mt-2 mb-1';
+    hint.textContent = '¿Quizá buscabas?';
+    box.appendChild(hint);
+    const ul = document.createElement('ul');
+    ul.className = 'mb-0';
+    for (const s of suggestions) {
+      const li  = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type      = 'button';
+      btn.className = 'btn btn-link p-0 text-decoration-none';
+      btn.style.color = '#fca5a5';
+      btn.textContent = s.codigo + ' · ' + s.nombre;
+      btn.addEventListener('click', () => { setValue(s.codigo); doSearch(); });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    }
+    box.appendChild(ul);
   }
-  box.innerHTML = html;
   document.getElementById('notFoundSection').classList.remove('d-none');
 }
 

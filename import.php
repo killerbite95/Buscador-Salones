@@ -30,6 +30,11 @@ if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
+if ($file['size'] > 256 * 1024 * 1024) {
+    header('Location: admin.php?error=' . urlencode('El archivo supera el límite de 256 MB.'));
+    exit;
+}
+
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 if (!in_array($ext, ['csv', 'txt'], true)) {
     header('Location: admin.php?error=' . urlencode('Solo se aceptan archivos .csv o .txt'));

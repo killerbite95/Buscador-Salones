@@ -72,7 +72,7 @@ function doLogin(string $user, string $pass): bool
 {
     $ip = clientIp();
 
-    if (hash_equals(ADMIN_USER, $user) && hash_equals(ADMIN_PASS, $pass)) {
+    if (hash_equals(ADMIN_USER, $user) && password_verify($pass, ADMIN_PASS)) {
         startSession();
         session_regenerate_id(true);
         $_SESSION['logged_in'] = true;

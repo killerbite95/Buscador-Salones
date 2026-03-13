@@ -38,25 +38,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Admin · <?= APP_NAME ?></title>
   <link rel="icon" type="image/png" href="images/logo-sp.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
   <style>
+    /* Page-specific: login */
     body {
-      background: #0f172a;
       background-image: radial-gradient(ellipse at 50% 0%, rgba(220,38,38,.07) 0%, transparent 55%);
     }
     .card-login {
       background: #1e293b; border: 1px solid #334155; border-radius: 1rem;
       box-shadow: 0 8px 32px rgba(0,0,0,.25), 0 0 0 1px rgba(51,65,85,.5);
     }
-    .btn-sportium { background: #dc2626; border-color: #dc2626; color: #fff; transition: all .2s; }
-    .btn-sportium:hover { background: #b91c1c; border-color: #b91c1c; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,.3); }
-    .btn-sportium:active { transform: scale(.97); }
-    .form-control:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
-    @keyframes fadeInUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes spin { to { transform:rotate(360deg); } }
     .login-wrapper { animation: fadeInUp .4s ease-out both; }
-    .spinner-sm { width:1rem; height:1rem; border:2.5px solid rgba(255,255,255,.25); border-top-color:#fff; border-radius:50%; animation:spin .5s linear infinite; display:inline-block; vertical-align:middle; }
-    .pwd-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#64748b; cursor:pointer; padding:2px; line-height:1; transition:color .15s; }
-    .pwd-toggle:hover { color:#e2e8f0; }
+    .pwd-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #94a3b8; cursor: pointer;
+      padding: 2px; line-height: 1; transition: color .15s;
+    }
+    .pwd-toggle:hover { color: #e2e8f0; }
   </style>
 </head>
 <body class="d-flex align-items-center justify-content-center" style="min-height:100vh">
@@ -71,15 +69,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="card-login p-4">
       <?php if ($error): ?>
         <div class="alert alert-danger rounded-3 py-2 d-flex align-items-center gap-2 small mb-3" role="alert">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="flex-shrink-0">
-            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="flex-shrink-0" aria-hidden="true">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>>
           </svg>
           <?= htmlspecialchars($error) ?>
         </div>
       <?php endif; ?>
       <?php if ($blocked && !$error): ?>
         <div class="alert alert-warning rounded-3 py-2 d-flex align-items-center gap-2 small mb-3" role="alert">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="flex-shrink-0" aria-hidden="true">
             <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
           </svg>
           IP bloqueada temporalmente. Espera 15 minutos.
@@ -98,10 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label class="form-label text-secondary small mb-1">Contraseña</label>
           <div class="position-relative">
             <input type="password" name="pass" id="passInput" class="form-control bg-dark border-secondary text-white pe-5"
-                   placeholder="••••••••"
                    autocomplete="current-password" required>
             <button type="button" class="pwd-toggle" id="pwdToggle" tabindex="-1" aria-label="Mostrar contraseña">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
                 <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
               </svg>
@@ -114,9 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
     </div>
 
-    <p class="text-center mt-4 mb-0">
-      <small class="text-secondary" style="font-size:.75rem">© <?= date('Y') ?> Sportium — Uso interno</small>
-    </p>
+    <?php include __DIR__ . '/footer.php'; ?>
 
   </div>
 
