@@ -91,31 +91,4 @@ Una vez dentro:
 
 ## Notas importantes
 
-- **BD SQLite**: se crea automáticamente en `data/salones.db` la primera vez
-- **Permisos**: asegúrate de que Apache tiene permisos de escritura en la carpeta `data/`
-- **PHP 8.0+**: XAMPP debe tener PHP 8.0 o superior (generalmente sí)
-- **pdo_sqlite**: debe estar habilitado en `php.ini` (está por defecto)
-
-## Troubleshooting
-
-**"No compatible SQLite"**
-- Edita `C:\xampp\php\php.ini` y asegúrate de que `extension=pdo_sqlite` no está comentado
-
-**"Permission denied" en data/**
-- Dale permisos de escritura a la carpeta: click derecho → Propiedades → Seguridad → Permisos completos
-
-**"Call to undefined function password_hash"**
-- Requiere PHP 5.5+, que XAMPP tiene por defecto. Si aún así falla, actualiza XAMPP.
-
----
-
-## Actualizar desde Git
-
-Si quieres traer nuevos cambios del repositorio:
-
-```bash
-cd C:\xampp\htdocs\buscador-salones
-git pull origin main
-```
-
-⚠️ **Nota:** no overwrite `config.php` (está en `.gitignore`).
+- **BD SQLite**: se crea automáticamente en `data/salones.db` la primera vez.
