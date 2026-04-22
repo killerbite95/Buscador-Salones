@@ -24,7 +24,7 @@ C:\xampp\php\php.exe -r "echo password_hash('CONTRASEÑA-USUARIO', PASSWORD_DEFA
 
 **Ejemplo:**
 ```bash
-C:\xampp\php\php.exe -r "echo password_hash('sportium2026', PASSWORD_DEFAULT);"
+C:\xampp\php\php.exe -r "echo password_hash('buscador2026', PASSWORD_DEFAULT);"
 ```
 
 La salida será algo como:
@@ -50,7 +50,7 @@ Navega a `C:\xampp\htdocs\buscador-salones\` y:
    define('ADMIN_USER', 'admin');
    define('ADMIN_PASS', '$2y$10$Sel0g5A/mbrGl28hIz5ESuXrQ./UTLDNnGNYB833sH1Nxnbj6ytN6');
 
-   define('APP_NAME', 'Buscador de Salones · Sportium');
+   define('APP_NAME', 'Buscador de Salones');
    ```
 
    Reemplaza el valor entre comillas de `ADMIN_PASS` con el hash que generaste en el Paso 2.

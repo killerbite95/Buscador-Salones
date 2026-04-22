@@ -18,7 +18,7 @@ $headerActions  = $headerActions  ?? '';
   <div class="container d-flex align-items-center justify-content-between py-3" style="max-width:<?= $headerMaxWidth ?>">
 
     <a href="<?= htmlspecialchars($headerHref) ?>" class="d-flex align-items-center gap-3 text-decoration-none">
-      <img src="images/logo-sp.png" alt="Sportium" height="36">
+      <img src="images/logo-sp.png" alt="Logo Buscador" height="36">
       <div class="d-none d-sm-block lh-sm">
         <div class="fw-semibold text-white" style="font-size:.95rem"><?= htmlspecialchars($headerTitle) ?></div>
         <div class="text-secondary" style="font-size:.72rem"><?= $headerSubtitle ?></div>

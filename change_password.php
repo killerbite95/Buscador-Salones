@@ -52,7 +52,7 @@ if (!isAdmin() && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="text-center mb-4 animate-in">
     <a href="index.php">
-      <img src="images/logo-sp.png" alt="Sportium" height="40">
+      <img src="images/logo-sp.png" alt="Logo Buscador" height="40">
     </a>
   </div>
 
