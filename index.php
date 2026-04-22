@@ -441,7 +441,7 @@ function renderResult(salon, pisignage) {
     for (const p of pisignage) {
       const last    = p.last_reported ? new Date(p.last_reported) : null;
       const diffH   = last ? (now - last.getTime()) / 36e5 : null;
-      const offline = diffH !== null && diffH > 24;
+      const offline = diffH !== null && diffH > 96;
 
       const tr = document.createElement('tr');
 

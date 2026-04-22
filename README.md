@@ -1,6 +1,6 @@
-# Buscador de Salones · Sportium
+# Buscador de Salones ·  
 
-Herramienta interna que centraliza la información de red y servicios de cada salón de Sportium: IPs (SSBT, POS, Albos/Multi, PiSignage), routers, configuración de TV, SIS, ARC y más. Todo en un solo lugar para poder dar un servicio rápido y eficaz sin tener que consultar múltiples fuentes.
+Herramienta interna que centraliza la información de red y servicios de cada salón de  : IPs (SSBT, POS, Albos/Multi, PiSignage), routers, configuración de TV, SIS, ARC y más. Todo en un solo lugar para poder dar un servicio rápido y eficaz sin tener que consultar múltiples fuentes.
 
 La integración con PiSignage permite asociar las pantallas (players) de cada sala y consultar sus IPs, playlists y estado de conexión directamente desde el buscador.
 
@@ -91,7 +91,7 @@ El admin puede crear usuarios desde el panel con 4 niveles de permisos:
 │   ├── .htaccess       # Bloquea acceso directo a la BD
 │   └── salones.db      # Base de datos SQLite (auto-generada)
 └── images/
-    └── logo-sp.png     # Logo Sportium
+    └── logo-sp.png     # Logo 
 ```
 
 ## Seguridad
@@ -119,4 +119,4 @@ Para detalles técnicos sobre la arquitectura, base de datos, API, seguridad y f
 
 ## Licencia
 
-Uso interno — Sportium.
+Uso interno —  .

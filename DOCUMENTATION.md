@@ -174,7 +174,7 @@ Rate limiting: `ip`, `attempted_at`. Se purga automáticamente tras 15 minutos.
 
 ### Sesión
 
-- Cookie: `SPORTIUM_SID`
+- Cookie: ` _SID`
 - `HttpOnly`, `SameSite=Strict`
 - `Secure` si HTTPS está activo
 - Regeneración de ID cada 20 minutos
@@ -301,7 +301,7 @@ Si no encuentra:
 | Cards | `#1e293b` |
 | Bordes | `#334155` |
 | Texto secundario | `#94a3b8` |
-| Acento (Sportium) | `#dc2626` |
+| Acento ( ) | `#dc2626` |
 
 ### Funcionalidades JS
 
@@ -327,7 +327,7 @@ Si no encuentra:
 
 ### Arquitectura de componentes compartidos
 
-- **`styles.css`** — CSS común: body, animaciones, `.card-dark`, `.btn-sportium`, dropdown, forms, scrollbar, spinner, header
+- **`styles.css`** — CSS común: body, animaciones, `.card-dark`, `.btn- `, dropdown, forms, scrollbar, spinner, header
 - **`header.php`** — Navbar parametrizada vía variables PHP (`$headerTitle`, `$headerSubtitle`, `$headerHref`, `$headerMaxWidth`, `$headerActions`)
 - **`footer.php`** — Footer con copyright
 - **`helpers.php`** — Funciones compartidas: parseo CSV, detección de columnas, `auditLog()`
