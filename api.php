@@ -75,6 +75,13 @@ if ($digits !== '') {
         $stmt->execute([$digits . '%']);
         $salon = $stmt->fetch();
     }
+
+    // Fallback: integer cast comparison handles leading-zero mismatches (e.g. "501" ↔ "0501")
+    if (!$salon) {
+        $stmt = $pdo->prepare("SELECT * FROM salones WHERE CAST(codigo AS INTEGER) = ? ORDER BY LENGTH(codigo) LIMIT 1");
+        $stmt->execute([(int)$digits]);
+        $salon = $stmt->fetch();
+    }
 }
 
 // If no match by code, try name search
@@ -114,10 +121,11 @@ if (!$salon) {
 }
 
 // Incluir players PiSignage si los hay para este código
+// CAST comparison handles leading-zero mismatches between salones ("0501") and pisignage ("501")
 $pi = $pdo->prepare("
     SELECT name, screen, ip_address, playlist, last_reported
     FROM pisignage_players
-    WHERE codigo = ?
+    WHERE CAST(codigo AS INTEGER) = CAST(? AS INTEGER)
     ORDER BY screen
 ");
 $pi->execute([$salon['codigo']]);

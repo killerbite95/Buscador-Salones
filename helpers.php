@@ -96,10 +96,13 @@ function extractScreenFromPlayerName(string $name): string
 function extractCode(string $name): ?string
 {
     if (preg_match('/(?:^|\D)(\d{4,6})(?!\d)/', $name, $m)) {
-        return $m[1];
+        $code = ltrim($m[1], '0');
+        return $code !== '' ? $code : $m[1];
     }
     $all = preg_replace('/\D+/', '', $name);
-    return $all !== '' ? $all : null;
+    if ($all === '') return null;
+    $code = ltrim($all, '0');
+    return $code !== '' ? $code : $all;
 }
 
 function ensureUtf8(string $raw): string
